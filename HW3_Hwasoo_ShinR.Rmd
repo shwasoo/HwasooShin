@@ -66,7 +66,7 @@ head(Sensory3)
 #indicates number of operation.
 ```
 
-Through these steps we can successfully import and clean the data. We used pipe operations, dplyr, and readr package for effective data munging. Below is some syntax to help us glimpse the information implied in the data.
+Through these steps we can successfully import and clean the data. We used pipe operations, dplyr, and readr package for effective data munging. Below are some syntax to help us glimpse the information implied in the data.
 
 ```{r warning=FALSE}
 
