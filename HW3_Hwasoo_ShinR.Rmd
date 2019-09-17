@@ -59,6 +59,11 @@ Sensory2<-data.frame(Sensory2)
 #Convert Sensory2 data type from matrix to data frame
 colnames(Sensory2)<-Sensory2Col
 #Give names of columns in Sensory2 data
+Sensory3<-gather(Sensory,'Operator','value',-Item)
+#Make it into a long data. 'gather' function helps convert wide data into long data.
+head(Sensory3)
+#We can see that the first variable indicates the number of item, and second
+#indicates number of operation.
 ```
 
 Through these steps we can successfully import and clean the data. We used pipe operations, dplyr, and readr package for effective data munging. Below is some syntax to help us glimpse the information implied in the data.
