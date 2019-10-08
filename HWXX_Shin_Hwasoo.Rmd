@@ -1,0 +1,125 @@
+---
+title: "Homework 6"
+author: "Hwasoo Shin"
+date: '2019 10 5 '
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problem 3
+
+```{r}
+parta<-function(x){apply(x,2,mean)}
+#Check the ratio of success 
+
+set.seed(12345)
+P4<-matrix(rbinom(10,1,prob=(30:40)/100),nrow=10,ncol=10,byrow=FALSE) #Make a 10x10 matrix
+apply(P4,1,mean) #Check the mean of each row
+apply(P4,2,mean) #Check the mean of each column
+```
+We can see that every row and column are the same. It looks like we are not getting the matrix that we wanted
+
+```{r}
+problem3<-function(p){rbinom(10,1,p)} #Function for bernoulli generator
+sapply((30:40)/100,problem3) #Use the function for probability from0.3 to 0.4.
+#Each column reperesents values on specific probability.
+P<-sapply((30:40)/100,problem3) 
+parta(P) #Check the ratio of success by columns.
+```
+
+We can now see that the probabilites of each column has different value. This is the function and matrices that we were looking for.
+
+## Problem 4
+
+
+
+```{r}
+problem4<-function(x=NULL){
+  RDS<-readRDS("C:/Users/pc/Desktop/HWASOO/STUDY/StatPackage/Homework6/HW6_data.rds")
+  #Read the data file
+    if(is.null(x)){ #if argument not given, plot all the data in the same graph
+  plot(RDS$dev1,RDS$dev2,pch=19,col='blue',main='Scatterplot',xlab='dev1',ylab="dev2",cex=0.5)}
+  
+  else{ #if argument given, plot data in each graph
+    RDSsplit<-split(RDS[-1],RDS$Observer)
+    lapply(RDSsplit,plot) #Apply by elements in a list
+  }
+}
+
+problem4() #Make the general plot
+problem4(1) #Make plots by observations
+```
+
+## Problem 5
+
+```{r}
+setwd("C:/Users/pc/Desktop/HWASOO/STUDY/StatPackage/Homework6")
+library(downloader)
+library(tidyverse)
+library(mapproj)
+download("http://www.farinspace.com/wp-content/uploads/us_cities_and_states.zip",dest="us_cities_states.zip")
+#download the data
+unzip("us_cities_states.zip")
+library(data.table)
+states <- fread(input = "./us_cities_and_states/states.sql",skip = 23,sep = "'", sep2 = ",", header = F, select = c(2,4))
+cities <- fread(input = "./us_cities_and_states/cities.sql",skip = 23,sep = "'", sep2 = ",", header = F, select = c(2,4))
+citiesExtend <- fread(input = "./us_cities_and_states/cities_extended.sql",skip = 23,sep = "'", sep2 = ",", header = F, select = c(2,4))
+#Read all the data needed
+city<-rbind(cities,citiesExtend) #Merge cities and citiesExtend datasets
+table(city[,2]) #Table of number of cities
+
+problem5<-function(x){ #Function that will have inputs as "states"
+  one<-str_split(x,"") #Split the word by every letter
+  two<-unlist(one) #Unlist the data
+  three<-tolower(two) #Make all letters in lower case
+  return(three) #Return each letter
+}
+lett<-function(x){ #Function that will have inputs as "letters"
+  x==letters #Check if the letter is same as any alphabet
+}
+wrapit<-function(x){ #Function that will count how many letters are in the word
+  apply(sapply(problem5(x),lett),1,sum) #Use apply function to apply to every alphabet letter
+}
+
+states2<-states[order(states[,1]),] #Order states in alphabetical order
+mat<-matrix(0,51,26) #Make a matrix for every state name
+for(i in 1:51){
+  mat[i,]<-wrapit(states2[i,1])
+}
+mat<-mat[-9,] #Remove "DC" (Considered not as a state)
+
+matfin<-apply(mat,1,max) #Get the maximum of each row
+matfin<-matfin>3 #Get the bool type for variable
+matfin<-as.numeric(matfin) #Get numeric values for it
+matfin<-data.frame(state=tolower(rownames(USArrests)),matfin)
+
+tabcity<-table(city[,2])[-c(8,40)] #Remove "DC" and "PR"data
+tabcity<-data.frame(tabcity) #Make into a data frame
+colnames(tabcity)<-c("StateSt","Count") #Change the variable names
+tabcity<-data.frame(state=tolower(rownames(USArrests)),tabcity)
+
+
+load("C:/Users/pc/Desktop/HWASOO/STUDY/StatPackage/Homework6/fifty_states.rda")
+crimes<-data.frame(state=tolower(rownames(USArrests)),USArrests)
+p1<-ggplot(tabcity,aes(map_id=state))+
+geom_map(aes(fill=Count),map=fifty_states) +
+  expand_limits(x=fifty_states$long,y=fifty_states$lat) +
+  coord_map() +
+  scale_x_continuous(breaks=NULL) +
+  scale_y_continuous(breaks=NULL) +
+  labs(x ="", y = "",title="Map 1: Colored by city counts") +
+  theme(legend.position="bottom",panel.background=element_blank())
+p1 #Plot for the first map; color it by number of cities
+
+p2<-ggplot(matfin,aes(map_id=state))+
+geom_map(aes(fill=matfin),map=fifty_states) +
+  expand_limits(x=fifty_states$long,y=fifty_states$lat) +
+  coord_map() +
+  labs(x ="", y = "",title="Map 2: Colored by #of same letters") +
+  theme(legend.position="bottom",panel.background=element_blank())
+p2 #Plot for the second map; color it only when more than same three letters appeared 
+
+```
