@@ -2,7 +2,9 @@
 title: "Homework 7"
 author: "Hwasoo Shin"
 date: '2019 10 12 '
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -24,9 +26,11 @@ return(k)
 ### (a)
 
 
-The code won't work since the object "Boot" was never assigned. He used Boot_times to assign number of bootstraps. However, when he was making loops he sued "Boot" instead. To make the code work he should change "Boot" to "Boot_times" then it will work.
+The code won't work since the object "Boot" was never assigned. He used Boot_times to assign number of bootstraps. However, when he was making loops he sued "Boot" instead. To make the code work he should change "Boot" to "Boot_times", then it will work.
 
 ### (b)
+
+We can get bootstraps from the sample. When bootstrapping, we have to make sure that the size of bootstrap sample is same as the sample size.
 
 ```{r}
 Sensory<-read_table("https://www2.isye.gatech.edu/~jeffwu/wuhamadabook/data/Sensory.dat",skip=1)
@@ -82,7 +86,7 @@ apply(parmat,2,var) #Variance of parameters
 
 ### (c)
 
-We will use "parallel" package to make clusters. Theoretically, it will boost up our code to run faster.
+We will use "parallel" package to make clusters. Theoretically, it will boost up our code to run faster. We can do parallel computing since there are more than 1 core in the computer to operate programs.
 
 ```{r warning=FALSE}
 detectCores() #there are 8 cores in my laptop
@@ -98,7 +102,7 @@ problem2<-function(x){
 
 
 system.time({
-  cl<-makeCluster(6)
+  cl<-makeCluster(8)
   clusterExport(cl,"Sensory")
   parSapply(cl,1:1000,function(x){
     x<-NULL
@@ -156,7 +160,7 @@ return(k)
 } 
 
 system.time({
-cl<-makeCluster(7)
+cl<-makeCluster(8)
 clusterExport(cl,"problem3")
 parSapply(cl,seq(-20,10,length=1000),problem3)
 stopCluster(cl)
@@ -169,7 +173,7 @@ We can see the time has slightly reduced to run the code. However, the elasped t
 Using descent gradient method, we will start with various initial points and step sizes. The tolerance is 1e-9, which is, if the difference between previous value and current value is smaller than 1e-9, our iteration to find the solution will stop.
 
 ```{r}
-xseq<-seq(-20,-2,length=10000)
+posx<-seq(-20,-2,length=10000)
 
 problem4<-function(k){
   kpre<-0
@@ -200,7 +204,7 @@ sol5m
 
 ### (a)
 
-We can see that it takes a long time to run this whole syntax. One way to avoid is to change the stopping rule, for example, we can change the tolerance to 1e-7. Then the function will loop less and will help us to get results faster. However, the results might be incorrect since the tolerance is too big. We can also increase the step. This can help us avoid the function only finding the local minimum, but also causes prevents the function from getting enough close to any minimum.
+We can see that it takes a long time to run this whole syntax. One way to avoid is to change the stopping rule, for example, we can change the tolerance to 1e-7. Then the function will loop less and will help us to get results faster. However, the results might be incorrect since the tolerance is too big. We can also increase the step. This can help us avoid the function only finding the local minimum, but also prevents the function from getting enough close to any minimum.
 
 ### (b)
 
