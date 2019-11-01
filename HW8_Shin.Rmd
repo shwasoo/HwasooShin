@@ -1,0 +1,69 @@
+---
+title: "Homework 8"
+author: "Hwasoo Shin"
+date: '2019 10 29 '
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(readr)
+library(ggplot2)
+library(gridExtra)
+library(knitr)
+```
+
+## Problem 3
+
+We can first read the file and clean up the data.
+
+```{r, results="hide", echo=TRUE, warning=FALSE}
+edstat<-read_csv("C:/Users/pc/Desktop/HWASOO/STUDY/StatPackage/Homework8/EdStats_csv/EdStatsData.csv")
+summary(edstat)
+#We can see that the last column is totally not available. Therefore, we will erase it
+dim(edstat)
+edstat<-edstat[,-70]
+mastered<-edstat #Store the raw data file
+checkna<-function(x){
+  tf<-sum(is.na(x))<65
+  return(tf)
+}
+idxed<-apply(edstat,1,checkna)
+table(idxed) #We can see that the number of rows that have at least one value on year column is 354575.
+edstat<-edstat[idxed,]
+dim(edstat) #We will only get the data that have valid values.
+table(edstat[,1])
+edstatmex<-edstat%>%filter(`Country Name`=="Mexico") #Data of Mexico
+edstatcan<-edstat%>%filter(`Country Name`=="Canada") #Data of Canada
+edstatcom<-rbind(edstatcan,edstatmex) #combine two datasets
+```
+
+## Problem 4
+
+```{r, eval=TRUE}
+edcomplt<-edstatcom[,c("2000","2010")]
+edcomplt2<-edcomplt[which(!is.na(edcomplt[,1])),]
+edcomplt3<-edcomplt2[which(!is.na(edcomplt2[,2])),]
+colnames(edcomplt3)<-c("Year2000","Year2010")
+summary(edcomplt3$Year2010)
+edcomplt3<-edcomplt3 %>% filter(Year2010<100)
+k<-hist(edcomplt3$Year2010,breaks=50,las=2)
+layout(rbind(c(2,2,0),c(1,1,3),c(1,1,3)))
+plot(edcomplt3$Year2000,edcomplt3$Year2010)
+hist(edcomplt3$Year2000,breaks=50,col=rgb(0.6,0.2,0.3))
+barplot(k$counts,horiz=TRUE,col=rgb(0.3,0.8,0.5))
+```
+We can make a simple histogram and plots to put altogether. To make the plot clean, I selected values which variable "Year2010" is less than 100. We can see there is a high positive correlation between variables "Year2000" and "Year2010". Also, both the variables' values are more concentrated near 0 than other larger values.
+
+## Problem 5
+
+```{r}
+p1<-ggplot(data=edcomplt3,aes(x=Year2000,y=Year2010))+geom_point()+theme_light()
+p2<-ggplot(data=edcomplt3,aes(x=Year2000))+geom_histogram(fill=rgb(0.8,0.2,0.3,0.8))+xlab("")+theme_classic()
+p3<-ggplot(data=edcomplt3,aes(x=Year2010))+geom_histogram(fill=rgb(0.2,0.3,0.9,0.8))+xlab("")+coord_flip()+theme_classic()
+grid.arrange(p1,p2,p3,layout_matrix=rbind(c(2,2,NA),c(1,1,3),c(1,1,3)))
+```
+We can make a same plot with ggplot package.
